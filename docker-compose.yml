@@ -1,0 +1,15 @@
+
+services:
+  setouta-server:
+    build:
+      context: .
+      dockerfile: server-fastapi/Dockerfile
+    image: setouta/server:local
+    environment:
+      - PIPER_BIN
+      - PIPER_VOICE
+      - WHISPER_MODEL=small
+      - WHISPER_DEVICE=cpu
+      - WHISPER_COMPUTE=int8
+    ports:
+      - "8000:8000"
