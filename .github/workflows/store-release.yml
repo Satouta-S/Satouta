@@ -26,11 +26,14 @@ jobs:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
 
-      # Decode keystore from secrets (if provided)
+           # Decode keystore from secrets (safe shell check)
       - name: Decode keystore
-        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
         run: |
-          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > release.jks
+          if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > release.jks
+            echo "Keystore decoded to release.jks"
+          else
+            echo "No ANDROID_KEYSTORE_BASE64 secret found; skipping decode."
 
       - name: Build AAB (storeRelease)
         working-directory: client-android
