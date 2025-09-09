@@ -1,5 +1,4 @@
 name: Android Store Release
-
 on:
   workflow_dispatch:
   push:
@@ -17,20 +16,13 @@ jobs:
     env:
       JAVA_VERSION: '17'
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
+      - uses: android-actions/setup-android@v3
 
-      # إعداد Android SDK
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      # فكّ ملف keystore من السرّ (لو موجود)
       - name: Decode keystore
         run: |
           if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
