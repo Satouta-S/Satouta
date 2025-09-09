@@ -1,0 +1,127 @@
+
+name: Firebase Test Lab (Android Matrix)
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - "client-android/**"
+      - ".github/workflows/ftl-android.yml"
+      - ".github/workflows/ftl-android-matrix.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      app_apk: ${{ steps.outputs-paths.outputs.app_apk }}
+      test_apk: ${{ steps.outputs-paths.outputs.test_apk }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build APKs for testing
+        working-directory: client-android
+        run: |
+          ./gradlew :app:assembleStoreDebug :app:assembleStoreDebugAndroidTest
+          ls -l app/build/outputs/apk/store/debug/
+          ls -l app/build/outputs/apk/androidTest/store/debug/
+      - name: Output paths
+        id: outputs-paths
+        run: |
+          echo "app_apk=client-android/app/build/outputs/apk/store/debug/app-store-debug.apk" >> $GITHUB_OUTPUT
+          echo "test_apk=client-android/app/build/outputs/apk/androidTest/store/debug/app-store-debug-androidTest.apk" >> $GITHUB_OUTPUT
+
+      - name: Upload APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: apks-for-ftl
+          path: |
+            client-android/app/build/outputs/apk/store/debug/app-store-debug.apk
+            client-android/app/build/outputs/apk/androidTest/store/debug/app-store-debug-androidTest.apk
+
+  ftl-matrix:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: "Pixel 6 • Android 14"
+            model: "oriole"
+            version: "34"
+            locale: "en"
+            orientation: "portrait"
+          - name: "Pixel 7 • Android 13"
+            model: "panther"
+            version: "33"
+            locale: "en_GB"
+            orientation: "portrait"
+          - name: "Pixel 4 • Android 12"
+            model: "flame"
+            version: "31"
+            locale: "en_US"
+            orientation: "portrait"
+          - name: "Android One • Android 11"
+            model: "sargo"
+            version: "30"
+            locale: "en_US"
+            orientation: "portrait"
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download APKs
+        uses: actions/download-artifact@v4
+        with:
+          name: apks-for-ftl
+
+      - name: Set up gcloud
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+
+      - name: Run tests on FTL • ${{ matrix.name }}
+        id: ftl
+        run: |
+          RESULTS_DIR="setouta/${{ github.run_id }}/${{ matrix.model }}-${{ matrix.version }}"
+          echo "RESULTS_DIR=$RESULTS_DIR" >> $GITHUB_OUTPUT
+          gcloud firebase test android run             --type instrumentation             --app app-store-debug.apk             --test app-store-debug-androidTest.apk             --device model=${{ matrix.model }},version=${{ matrix.version }},locale=${{ matrix.locale }},orientation=${{ matrix.orientation }}             --timeout 10m             --results-bucket "gs://${{ secrets.GCP_RESULTS_BUCKET }}"             --results-dir "$RESULTS_DIR" || echo "::warning::FTL returned non-zero for ${{ matrix.name }}"
+
+      - name: Write summary fragment
+        run: |
+          echo "- ✅ Ran on **${{ matrix.name }}** → Results: \`gs://${{ secrets.GCP_RESULTS_BUCKET }}\` / \`${{ steps.ftl.outputs.RESULTS_DIR }}\`" >> summary.md
+
+      - name: Upload job summary fragment
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftl-summary-${{ matrix.model }}-${{ matrix.version }}
+          path: summary.md
+
+  report:
+    needs: ftl-matrix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all fragments
+        uses: actions/download-artifact@v4
+        with:
+          path: ftl-fragments
+      - name: Compose HTML report
+        run: |
+          echo "<!doctype html><html lang='en'><meta charset='utf-8'><title>FTL Report</title><body><h1>Firebase Test Lab Report</h1>" > report.html
+          echo "<ul>" >> report.html
+          for f in ftl-fragments/*/summary.md; do
+            echo "<li>$(cat $f)</li>" >> report.html
+          done
+          echo "</ul><p>Run: $GITHUB_RUN_ID • Repo: $GITHUB_REPOSITORY</p></body></html>" >> report.html
+      - name: Upload HTML report
+        uses: actions/upload-artifact@v4
+        with:
+          name: ftl-report-html
+          path: report.html
