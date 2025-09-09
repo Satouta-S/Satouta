@@ -23,7 +23,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
-      # Prepare keystore from secret (no GitHub 'if' on secrets)
+      # Decode keystore from secret (no GitHub-level if; check inside bash)
       - name: Prepare keystore
         shell: bash
         env:
@@ -34,11 +34,11 @@ jobs:
             echo "ANDROID_KEYSTORE=$GITHUB_WORKSPACE/release.jks" >> "$GITHUB_ENV"
             echo "Keystore decoded."
           else
-            echo "No keystore secret found; proceeding unsigned if build allows."
+            echo "No ANDROID_KEYSTORE_BASE64 secret found; proceeding (unsigned if build allows)."
           fi
 
-      - name: Build AAB (storeRelease)
-        working-directory: client-android
+      - name: Build AAB (auto-detect task)
+        shell: bash
         env:
           ANDROID_KEYSTORE: ${{ env.ANDROID_KEYSTORE }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
@@ -46,10 +46,31 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           chmod +x ./gradlew
-          ./gradlew :app:bundleStoreRelease --stacktrace --no-daemon
+          # قرائة لستة التاسكات وتحديد هل bundleStoreRelease موجودة أم لا
+          if ./gradlew :app:tasks --all | grep -q "^bundleStoreRelease"; then
+            TASK=":app:bundleStoreRelease"
+          else
+            TASK=":app:bundleRelease"
+          fi
+          echo "Using task: $TASK"
+          ./gradlew $TASK --stacktrace --no-daemon
+
+      - name: Locate AAB path
+        shell: bash
+        run: |
+          if [ -f app/build/outputs/bundle/storeRelease/app-store-release.aab ]; then
+            echo "AAB_PATH=app/build/outputs/bundle/storeRelease/app-store-release.aab" >> $GITHUB_ENV
+          elif [ -f app/build/outputs/bundle/release/app-release.aab ]; then
+            echo "AAB_PATH=app/build/outputs/bundle/release/app-release.aab" >> $GITHUB_ENV
+          else
+            echo "Could not find AAB. Available bundle outputs:" 
+            ls -R app/build/outputs/bundle || true
+            exit 1
+          fi
+          echo "AAB selected: $AAB_PATH"
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: app-store-release.aab
-          path: client-android/app/build/outputs/bundle/storeRelease/app-store-release.aab
+          path: ${{ env.AAB_PATH }}
