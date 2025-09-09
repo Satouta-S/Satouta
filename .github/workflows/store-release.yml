@@ -26,14 +26,19 @@ jobs:
           distribution: temurin
           java-version: ${{ env.JAVA_VERSION }}
 
-           # Decode keystore from secrets (safe shell check)
+      # إعداد Android SDK
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      # فكّ ملف keystore من السرّ (لو موجود)
       - name: Decode keystore
         run: |
           if [ -n "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" ]; then
-            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > release.jks
-            echo "Keystore decoded to release.jks"
+            echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > $GITHUB_WORKSPACE/release.jks
+            echo "Keystore decoded."
           else
-            echo "No ANDROID_KEYSTORE_BASE64 secret found; skipping decode."
+            echo "No ANDROID_KEYSTORE_BASE64; skipping decode."
+          fi
 
       - name: Build AAB (storeRelease)
         working-directory: client-android
