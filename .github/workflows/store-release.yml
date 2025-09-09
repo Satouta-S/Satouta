@@ -2,14 +2,13 @@
 name: Android Store Release
 
 on:
-  workflow_dispatch:
-    inputs:
-      upload_to_play:
-        description: "Upload to Google Play (Closed testing)"
-        required: true
-        default: "false"
-        type: choice
-        options: ["false", "true"]
+  workflow_dispatch: {}    # يفعّل زر Run workflow
+  push:
+    branches: [ main ]
+    paths:
+      - 'client-android/**'
+      - '.github/workflows/store-release.yml'
+
 
 jobs:
   build:
