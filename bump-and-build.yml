@@ -1,0 +1,44 @@
+
+name: Bump versionCode & Build
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bump-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Bump versionCode
+        run: ./ci/bump_version_code.sh
+
+      - name: Commit & push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add client-android/gradle.properties
+          git commit -m "ci: bump VERSION_CODE"
+          git push origin HEAD:main
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Build storeRelease AAB
+        working-directory: client-android
+        run: ./gradlew :app:bundleStoreRelease --stacktrace --no-daemon
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: setouta-aab-after-bump
+          path: client-android/app/build/outputs/bundle/storeRelease/*.aab

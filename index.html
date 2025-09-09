@@ -1,0 +1,74 @@
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>ستوتة — مساعد صوتي عربي</title>
+  <meta name="description" content="ستوتة: مساعد صوتي عربي طبيعي لفتح التطبيقات، الملاحة، والدردشة لساعات.">
+  <meta property="og:title" content="ستوتة — مساعد صوتي عربي"/>
+  <meta property="og:description" content="اتكلم مع ستوتة، افتح التطبيقات بصوتك، وملاحة الخرائط بنقرة صوت."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:image" content="assets/og-cover.png"/>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml"/>
+  <style>
+    :root { --bg:#0b1220; --card:#121a2b; --text:#f7fafc; --muted:#a6b0c2; --accent:#66d9e8; }
+    * { box-sizing:border-box }
+    body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); }
+    .wrap { max-width:1080px; margin:0 auto; padding:24px; }
+    header { display:flex; align-items:center; gap:14px; padding:24px 0; }
+    header img.logo { width:40px; height:40px }
+    h1 { font-size:32px; margin:0 }
+    .hero { display:grid; grid-template-columns:1.2fr 0.8fr; gap:24px; align-items:center; }
+    .card { background:var(--card); border:1px solid #1e2a41; border-radius:16px; padding:20px; box-shadow:0 6px 24px rgba(0,0,0,.35) }
+    .muted { color:var(--muted) }
+    .btns a { display:inline-flex; align-items:center; gap:8px; padding:12px 16px; border-radius:12px; background:var(--accent); color:#001018; text-decoration:none; font-weight:600 }
+    .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:24px }
+    .feature h3 { margin:0 0 6px 0 }
+    footer { margin:40px 0 20px; color:var(--muted); font-size:14px; }
+    .kicker { letter-spacing:.08em; text-transform:uppercase; color:#9ad8ff; font-weight:700; font-size:12px; }
+    @media (max-width:900px) {
+      .hero { grid-template-columns:1fr }
+      .grid { grid-template-columns:1fr }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <img class="logo" src="assets/favicon.svg" alt="Setouta"/>
+      <div>
+        <div class="kicker">SETOUTA</div>
+        <h1>ستوتة — مساعد صوتي عربي</h1>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="card">
+        <p class="muted">اتكلم مع ستوتة بالساعات: يِسمعك، يفهمك، ويرد عليك بصوت عربي طبيعي. افتح التطبيقات، ابدأ الملاحة، واعمل مهام بسيطة—بكلمة منك.</p>
+        <div class="btns" style="margin-top:12px">
+          <a href="#" title="Google Play (قريبًا)"><img src="assets/play-badge.svg" alt="" style="height:24px">Google Play (قريبًا)</a>
+        </div>
+        <ul class="muted" style="margin-top:16px; line-height:1.9">
+          <li>فتح التطبيقات والملاحة بالأوامر الصوتية</li>
+          <li>مركز خصوصية وموافقات واضحة</li>
+          <li>أصوات عربية (Piper) وتحويل كلام دقيق (Whisper)</li>
+        </ul>
+      </div>
+      <div class="card">
+        <img src="assets/phone-mock.png" alt="لقطة تطبيق ستوتة" style="width:100%; border-radius:12px;"/>
+      </div>
+    </section>
+
+    <section class="grid">
+      <div class="card feature"><h3>خصوصية أولًا</h3><p class="muted">التسجيل يبدأ لما تختار. تقدر تغيّر الموافقات في أي وقت.</p></div>
+      <div class="card feature"><h3>لغة طبيعية</h3><p class="muted">فهم عربي باللهجات الشائعة واستجابات ودودة.</p></div>
+      <div class="card feature"><h3>“صوابعي” بصوتك</h3><p class="muted">فتح التطبيقات والخرائط—وبنَضيف أوامر نقر عند طلبك فقط.</p></div>
+    </section>
+
+    <footer>
+      <a href="PRIVACY_POLICY.html">سياسة الخصوصية</a> • آخر تحديث: 9 September 2025
+    </footer>
+  </div>
+</body>
+</html>

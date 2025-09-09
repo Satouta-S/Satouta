@@ -1,0 +1,50 @@
+
+name: Uptime Monitor
+
+on:
+  schedule:
+    - cron: "*/30 * * * *"  # every 30 minutes
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check health
+        id: check
+        run: |
+          URL="${{ secrets.SERVER_HEALTH_URL }}"
+          if [ -z "$URL" ]; then
+            echo "No SERVER_HEALTH_URL secret set. Skipping."
+            echo "ok=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "Pinging $URL"
+          code=$(curl -s -o /dev/null -w "%{http_code}" "$URL" || echo "000")
+          echo "HTTP $code"
+          if [ "$code" != "200" ]; then
+            echo "ok=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          echo "ok=true" >> $GITHUB_OUTPUT
+
+      - name: Notify Slack on failure
+        if: steps.check.outputs.ok == 'false'
+        run: |
+          if [ -z "${{ secrets.SLACK_WEBHOOK_URL }}" ]; then
+            echo "Slack webhook not configured."
+            exit 0
+          fi
+          payload='{"text":"Setouta Uptime alert: health check failed for ${{ secrets.SERVER_HEALTH_URL }} at ${{ github.repository }}#${{ github.run_id }}"}'
+          curl -X POST -H 'Content-type: application/json' --data "$payload" "${{ secrets.SLACK_WEBHOOK_URL }}"
+
+      - name: Open Issue on failure
+        if: steps.check.outputs.ok == 'false'
+        uses: dacbd/create-issue-action@v1.2.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          title: "Uptime failure: server unhealthy"
+          body: |
+            The health endpoint ${{ secrets.SERVER_HEALTH_URL }} did not return 200 at run ${{ github.run_id }}.
+            Please investigate logs and redeploy if necessary.
+          labels: "monitoring,bug"

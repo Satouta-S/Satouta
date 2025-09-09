@@ -1,0 +1,28 @@
+{
+  "data_collected": [
+    {
+      "type": "Audio (microphone)",
+      "purpose": [
+        "App functionality (voice chat)"
+      ],
+      "optional": true
+    },
+    {
+      "type": "App info and performance (crash logs)",
+      "purpose": [
+        "App functionality",
+        "Analytics"
+      ],
+      "optional": true
+    }
+  ],
+  "data_shared": [],
+  "security": {
+    "data_encrypted_in_transit": true,
+    "deletion_request_supported": true
+  },
+  "choices": {
+    "user_can_decline": true,
+    "user_can_change_consent": true
+  }
+}

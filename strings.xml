@@ -1,0 +1,21 @@
+
+<resources>
+    <string name="app_name">Setouta</string>
+    <string name="start">ابدأ</string>
+    <string name="stop">إيقاف</string>
+    <string name="accessibility_desc">خدمة إمكانيّة الوصول لتنفيذ نقرات بإذن المستخدم</string>
+
+    <string name="consent_title">الموافقة والخصوصية</string>
+    <string name="consent_text_html">
+        <![CDATA[
+        نعرض لك بإيجاز كيف يتعامل <b>ستوتة</b> مع بياناتك:
+        <ul>
+          <li>يُسجِّل الصوت فقط عند اختيارك &quot;ابدأ&quot; ويُرسل إلى الخادم لتحويله إلى نص وإرجاع الصوت.</li>
+          <li>يمكنك تعطيل التحليلات أو أي صلاحية في أي وقت من "مركز الخصوصية".</li>
+          <li>ميزة <b>إمكانية الوصول</b> و<b>الـOverlay</b> اختيارية، وتُستخدم فقط لتنفيذ إجراءات تطلبها أنت بصوتك.</li>
+        </ul>
+        بالاستمرار، أنت تمنح موافقاتك المحددة أدناه.
+        ]]>
+    </string>
+</resources>
+
