@@ -1,0 +1,23 @@
+
+# syntax=docker/dockerfile:1.6
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends         openjdk-17-jdk wget unzip git ca-certificates bash curl         && rm -rf /var/lib/apt/lists/*
+
+# Android SDK
+ENV ANDROID_SDK_ROOT=/opt/android-sdk
+RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools         && cd ${ANDROID_SDK_ROOT}/cmdline-tools         && wget -q https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip -O /tmp/cli.zip         && mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools/latest         && unzip -q /tmp/cli.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools/latest         && rm -f /tmp/cli.zip
+
+ENV PATH=$PATH:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin
+
+# Accept licenses and install required packages (API 35)
+RUN yes | sdkmanager --licenses >/dev/null         && sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0" "cmdline-tools;latest"
+
+WORKDIR /workspace
+
+# Gradle wrapper will download itself
+COPY client-android /workspace
+
+# Build storeRelease AAB
+CMD ["bash", "-lc", "./gradlew -p /workspace :app:bundleStoreRelease --stacktrace --no-daemon"]
